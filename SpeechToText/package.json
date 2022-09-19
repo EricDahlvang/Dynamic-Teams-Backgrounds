@@ -1,0 +1,23 @@
+{
+  "name": "speechtotext",
+  "version": "1.0.0",
+  "description": "",
+  "main": "apiTest.js",
+  "scripts": {
+    "start": "node apiTest.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EricDahlvang/Dynamic-Teams-Backgrounds.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EricDahlvang/Dynamic-Teams-Backgrounds/issues"
+  },
+  "homepage": "https://github.com/EricDahlvang/Dynamic-Teams-Backgrounds#readme",
+  "dependencies": {
+    "dotenv": "^16.0.2",
+    "node-fetch": "^2.6.7"
+  }
+}
