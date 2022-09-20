@@ -6,14 +6,15 @@
       "direction": "in",
       "name": "req",
       "methods": [
-        "get",
         "post"
-      ]
+      ],
+      "dataType": "binary"
     },
     {
       "type": "http",
       "direction": "out",
       "name": "res"
     }
-  ]
+  ],
+  "scriptFile": "../dist/SpeechToTextFunction/index.js"
 }

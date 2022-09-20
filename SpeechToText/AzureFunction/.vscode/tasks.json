@@ -38,27 +38,26 @@
 			"command": "host start",
 			"problemMatcher": "$func-node-watch",
 			"isBackground": true,
+			"dependsOn": "npm build (functions)"
+		},
+		{
+			"type": "shell",
+			"label": "npm build (functions)",
+			"command": "npm run build",
 			"dependsOn": "npm install (functions)",
-			"options": {
-				"cwd": "${workspaceFolder}/SpeechToText\\AzureFunction"
-			}
+			"problemMatcher": "$tsc"
 		},
 		{
 			"type": "shell",
 			"label": "npm install (functions)",
-			"command": "npm install",
-			"options": {
-				"cwd": "${workspaceFolder}/SpeechToText\\AzureFunction"
-			}
+			"command": "npm install"
 		},
 		{
 			"type": "shell",
 			"label": "npm prune (functions)",
 			"command": "npm prune --production",
-			"problemMatcher": [],
-			"options": {
-				"cwd": "${workspaceFolder}/SpeechToText\\AzureFunction"
-			}
+			"dependsOn": "npm build (functions)",
+			"problemMatcher": []
 		}
 	]
 }

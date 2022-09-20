@@ -10,7 +10,7 @@ const apiKey = process.env.SPEECH_KEY;
 
 const recognitionUrl = 'https://westus2.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed';
 
-const speech = fs.createReadStream(path.resolve(__dirname, 'this-is-a-sample-recording-to-test-speech-to-text-transcription.wav'));
+const speech = fs.readFileSync(path.resolve(__dirname, 'this-is-a-sample-recording-to-test-speech-to-text-transcription.wav'));
 
 fetch(recognitionUrl, {
     method: 'POST',

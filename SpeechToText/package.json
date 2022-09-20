@@ -4,7 +4,8 @@
   "description": "",
   "main": "apiTest.js",
   "scripts": {
-    "start": "node apiTest.js"
+    "start": "node apiTest.js",
+    "testFunc": "node azFuncTest.js"
   },
   "repository": {
     "type": "git",
