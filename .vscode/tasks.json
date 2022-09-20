@@ -1,0 +1,64 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "ESLint Auto-Fix",
+			"command": "${command:eslint.executeAutofix}"
+		},
+		{
+			"label": "Select All",
+			"command": "${command:editor.action.selectAll}"
+		},
+		{
+			"label": "Remove Unused Imports",
+			"command": "${command:editor.action.autoFix}"
+		},
+		{
+			"label": "Select None",
+			"command": "${command:cancelSelection}"
+		},
+		{
+			"label": "Go to Top",
+			"command": "${command:cursorTop}"
+		},
+		{
+			"label": "Auto-Fix and Auto-Format",
+			"dependsOrder": "sequence",
+			"dependsOn": [
+				"ESLint Auto-Fix",
+				"Select All",
+				"Remove Unused Imports",
+				"Select None",
+				"Go to Top"
+			],
+			"problemMatcher": []
+		},
+		{
+			"type": "func",
+			"command": "host start",
+			"problemMatcher": "$func-node-watch",
+			"isBackground": true,
+			"dependsOn": "npm install (functions)",
+			"options": {
+				"cwd": "${workspaceFolder}/SpeechToText\\AzureFunction"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "npm install (functions)",
+			"command": "npm install",
+			"options": {
+				"cwd": "${workspaceFolder}/SpeechToText\\AzureFunction"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "npm prune (functions)",
+			"command": "npm prune --production",
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}/SpeechToText\\AzureFunction"
+			}
+		}
+	]
+}
