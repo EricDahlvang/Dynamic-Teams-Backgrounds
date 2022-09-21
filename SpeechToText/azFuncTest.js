@@ -7,21 +7,23 @@ require('dotenv').config({
 });
 
 const localUrl = 'http://localhost:7071/api/SpeechToTextFunction';
+const remoteUrl = process.env.AZ_FUNC_URL + 'api/SpeechToTextFunction';
 
 const speech = fs.readFileSync(path.resolve(__dirname, 'this-is-a-sample-recording-to-test-speech-to-text-transcription.wav'), { encoding: 'binary'});
 
-fetch(localUrl, {
+const body = JSON.stringify({ 
+    speech,
+    conversationId: 'some:uniqueConversation',
+    timeStamp: new Date().toISOString(),
+    SPEECH_KEY: process.env.SPEECH_KEY
+});
+
+fetch(remoteUrl, {
     method: 'POST',
-    body: JSON.stringify({ 
-        speech,
-        conversationId: 'some:uniqueConversation',
-        timeStamp: new Date().toISOString(),
-        SPEECH_KEY: process.env.SPEECH_KEY
-    }),
+    body,
     headers: {
         Accept: '*/*',
-        'Content-Type': 'application/json',
-        'Transfer-Encoding': 'chunked'
+        'Content-Type': 'application/json'
     }
 })
     .then(response => {
