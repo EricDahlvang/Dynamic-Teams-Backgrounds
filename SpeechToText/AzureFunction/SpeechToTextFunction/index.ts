@@ -1,5 +1,6 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions"
+import { AzureFunction, Context, HttpRequest } from '@azure/functions'
 import { getTextFromSpeech } from './services/speechToText';
+import { getPromptFromText } from './services/textToPrompt';
 
 type Request = HttpRequest & {
     query: {
@@ -42,9 +43,10 @@ const httpTrigger: AzureFunction = async function (context: ContextResponse, req
         return;
     }
 
-    let prompt: string;
+    let text: string;
     try {
-        prompt = await getTextFromSpeech(buffer, context);
+        text = await getTextFromSpeech(buffer);
+        context.log(`Got text from speech: ${text}`);
     } catch(err) {
         context.res = {
             status: 500,
@@ -52,15 +54,24 @@ const httpTrigger: AzureFunction = async function (context: ContextResponse, req
         };
         return;
     }
-
-    // TODO: Add prompt beautification
+    
+    let prompt: string;
+    try {
+        prompt = await getPromptFromText(text);
+        context.log(`Got prompt from text: ${prompt}`);
+    } catch(err) {
+        context.res = {
+            status: 500,
+            body: `Error getting prompt from text\n${JSON.stringify(err)}`
+        };
+        return;
+    }
 
     // TODO: Send this off to Stable Diffusion
 
     context.res = {
-        // status: 200, /* Defaults to 200 */
         body: {
-            prompt: prompt,
+            prompt,
             conversationId: req.query.conversationId,
             timestamp: req.query.timestamp
         }
