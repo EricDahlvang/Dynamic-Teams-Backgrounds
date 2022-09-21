@@ -28,6 +28,10 @@ fetch(localUrl, {
         response.json()
             .then(result => {
                 console.log(JSON.stringify(result, null, 2));
+                const base64Data = result.image.replace(/^data:image\/png;base64,/, "");
+                fs.writeFile("generatedImage.png", base64Data, 'base64', (err) => {
+                    console.log(err);
+                });
             })
             .catch(err => {
                 console.error(err);
