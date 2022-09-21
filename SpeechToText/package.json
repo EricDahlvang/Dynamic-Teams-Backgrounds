@@ -19,6 +19,7 @@
   "homepage": "https://github.com/EricDahlvang/Dynamic-Teams-Backgrounds#readme",
   "dependencies": {
     "dotenv": "^16.0.2",
+    "form-data": "^4.0.0",
     "node-fetch": "^2.6.7"
   }
 }

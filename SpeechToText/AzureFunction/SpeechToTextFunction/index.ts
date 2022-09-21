@@ -1,41 +1,69 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-import fetch from 'node-fetch';
+import { getTextFromSpeech } from './services/speechToText';
 
-interface Request extends HttpRequest {
-    body: {
-        speech: string,
-        conversationId: string,
-        uniqueId: string
+type Request = HttpRequest & {
+    query: {
+        SPEECH_KEY: string;
+        conversationId: string;
+        timestamp: string;
     }
 }
 
-const httpTrigger: AzureFunction = async function (context: Context, req: Request): Promise<void> {
+type ContextResponse = Context & {
+    res: {
+        body: {
+            prompt: string;
+            conversationId: string;
+            timestamp: string;
+        } | string
+    }
+}
+
+const httpTrigger: AzureFunction = async function (context: ContextResponse, req: Request): Promise<void> {
+    if (req.query.SPEECH_KEY !== process.env.SPEECH_KEY) {
+        context.res = {
+            status: 403,
+            body: 'Unauthorized. Use the `SPEECH_KEY` and pass it into the request body under the SPEECH_KEY property'
+        };
+        return;
+    }
+
     context.log('HTTP trigger function processed a request.');
 
-    const recognitionUrl = 'https://westus2.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed';
-    const apiKey = process.env.SPEECH_KEY;
-
-    const buffer = Buffer.from(req.body as any, 'binary');
-
-    const response = await fetch(recognitionUrl, {
-        method: 'POST',
-        body: buffer,
-        headers: {
-            Accept: 'application/json;text/xml',
-            'Content-Type': 'audio/wav',
-            'Ocp-Apim-Subscription-Key': apiKey,
-            'Transfer-Encoding': 'chunked',
-            Expect: '100-continue'
+    let buffer: Buffer;
+    try {
+        buffer = Buffer.from(req.body, 'binary');
+        context.log('Converted speech WAV to buffer, successfully');
+    } catch(err) {
+        context.res = {
+            status: 500,
+            body: `Error converting speech WAV into buffer\n${JSON.stringify(err)}`
         }
-    });
+        return;
+    }
 
-    const json = await response.json();
+    let prompt: string;
+    try {
+        prompt = await getTextFromSpeech(buffer, context);
+    } catch(err) {
+        context.res = {
+            status: 500,
+            body: `Error converting Speech to Text\n${JSON.stringify(err)}`
+        };
+        return;
+    }
+
+    // TODO: Add prompt beautification
 
     // TODO: Send this off to Stable Diffusion
 
     context.res = {
         // status: 200, /* Defaults to 200 */
-        body: json
+        body: {
+            prompt: prompt,
+            conversationId: req.query.conversationId,
+            timestamp: req.query.timestamp
+        }
     };
 
 };
