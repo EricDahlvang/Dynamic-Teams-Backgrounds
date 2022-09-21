@@ -19,6 +19,10 @@ namespace sd_service.Controllers
 
 		private int ImageHeight => int.Parse(this._configuration["StableDiffusionValues:ImageHeight"]);
 
+		private string AuthKey => this._configuration["StableDiffusionValues:AuthenticationSecret"];
+
+		private bool EnableTestGetEndpoint => bool.Parse(this._configuration["StableDiffusionValues:EnableTestGetEndpoint"]);
+
 		/// <summary>
 		/// The endpoint where the StableDiffusion model is hosted via webui.
 		/// </summary>
@@ -37,22 +41,36 @@ namespace sd_service.Controllers
 		/// <param name="request">The request containing the prompt.</param>
 		/// <returns>The response containing the image.</returns>
 		[HttpPost]
-		public async Task<Image> Post(TextToImageRequest request)
+		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Image))]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+		public async Task<IActionResult> Post(TextToImageRequest request)
 		{
 			this._logger.LogInformation($"Received POST requst for conversationId: {request.ConversationId}");
+
+			if (request.AuthKey != this.AuthKey)
+			{
+				this._logger.LogCritical($"provided auth key was invalid: {request.AuthKey}");
+				return Unauthorized();
+			}
 
 			var client = new SdClient(this.SdHostEndpoint, this._logger);
 
 			var sdRequest = this.BuildRequest(request.Prompt);
 			var imageResponse = await client.SendRequest(sdRequest);
 
-			return new Image { Base64EncodedImage = imageResponse.data.First().First() };
+			return Ok(new Image { Base64EncodedImage = imageResponse.data.First().First() });
 		}
 
 		[HttpGet("Test")]
 		public async Task<Image> TestImageGeneration()
 		{
 			this._logger.LogInformation($"Received a GET request to the test endpoint.");
+
+			if (!this.EnableTestGetEndpoint)
+			{
+				this._logger.LogCritical($"GET endpoint is not enabled in configuration, so not doing anything.");
+				return null;
+			}
 
 			var client = new SdClient(this.SdHostEndpoint, this._logger);
 
@@ -84,6 +102,9 @@ namespace sd_service.Controllers
 
 			[DataMember(Name = "conversationId")]
 			public string ConversationId { get; set; }
+
+			[DataMember(Name = "authKey")]
+			public string AuthKey { get; set; }
 
 			[DataMember(Name = "timestamp")]
 			public DateTimeOffset TimeStamp { get; set; }
