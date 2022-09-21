@@ -1,4 +1,3 @@
-import { Context } from '@azure/functions';
 import fetch from 'node-fetch';
 
 const recognitionUrl = 'https://westus2.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed';
