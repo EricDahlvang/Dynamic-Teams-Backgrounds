@@ -7,28 +7,33 @@ require('dotenv').config({
 });
 
 const localUrl = 'http://localhost:7071/api/SpeechToTextFunction';
+const remoteUrl = process.env.AZ_FUNC_URL + 'api/SpeechToTextFunction';
 
 const speech = fs.readFileSync(path.resolve(__dirname, 'this-is-a-sample-recording-to-test-speech-to-text-transcription.wav'), { encoding: 'binary'});
 
-const queryParams = new URLSearchParams({
+const body = JSON.stringify({ 
+    speech,
     conversationId: 'some:uniqueConversation',
-    timestamp: new Date().getTime(),
+    timeStamp: new Date().toISOString(),
     SPEECH_KEY: process.env.SPEECH_KEY
-})
+});
 
-fetch(localUrl + '/?' + queryParams, {
+fetch(remoteUrl, {
     method: 'POST',
-    body: speech,
+    body,
     headers: {
         Accept: '*/*',
-        'Content-Type': 'audio/wav',
-        'Transfer-Encoding': 'chunked'
+        'Content-Type': 'application/json'
     }
 })
     .then(response => {
         response.json()
             .then(result => {
                 console.log(JSON.stringify(result, null, 2));
+                const base64Data = result.image.replace(/^data:image\/png;base64,/, "");
+                fs.writeFile("generatedImage.png", base64Data, 'base64', (err) => {
+                    console.log(err);
+                });
             })
             .catch(err => {
                 console.error(err);

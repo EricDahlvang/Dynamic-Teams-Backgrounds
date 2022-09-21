@@ -1,26 +1,31 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-import { getTextFromSpeech } from './services/speechToText';
+import { AzureFunction, Context, HttpRequest } from '@azure/functions'
+import { getTextFromSpeech } from './services/getTextFromSpeech';
+import { getPromptFromText } from './services/getPromptFromText';
+import { getImageFromPrompt } from './services/getImageFromPrompt';
 
 type Request = HttpRequest & {
-    query: {
+    body: {
         SPEECH_KEY: string;
         conversationId: string;
-        timestamp: string;
+        timeStamp: string;
+        speech: string
     }
 }
 
 type ContextResponse = Context & {
     res: {
         body: {
+            text: string;
             prompt: string;
             conversationId: string;
-            timestamp: string;
+            timeStamp: string;
+            image: string;
         } | string
     }
 }
 
 const httpTrigger: AzureFunction = async function (context: ContextResponse, req: Request): Promise<void> {
-    if (req.query.SPEECH_KEY !== process.env.SPEECH_KEY) {
+    if (req.body.SPEECH_KEY !== process.env.SPEECH_KEY) {
         context.res = {
             status: 403,
             body: 'Unauthorized. Use the `SPEECH_KEY` and pass it into the request body under the SPEECH_KEY property'
@@ -32,7 +37,7 @@ const httpTrigger: AzureFunction = async function (context: ContextResponse, req
 
     let buffer: Buffer;
     try {
-        buffer = Buffer.from(req.body, 'binary');
+        buffer = Buffer.from(req.body.speech, 'binary');
         context.log('Converted speech WAV to buffer, successfully');
     } catch(err) {
         context.res = {
@@ -42,9 +47,10 @@ const httpTrigger: AzureFunction = async function (context: ContextResponse, req
         return;
     }
 
-    let prompt: string;
+    let text: string;
     try {
-        prompt = await getTextFromSpeech(buffer, context);
+        text = await getTextFromSpeech(buffer);
+        context.log(`Got text from speech: ${text}`);
     } catch(err) {
         context.res = {
             status: 500,
@@ -52,17 +58,39 @@ const httpTrigger: AzureFunction = async function (context: ContextResponse, req
         };
         return;
     }
+    
+    let prompt: string;
+    try {
+        prompt = await getPromptFromText(text);
+        context.log(`Got prompt from text: ${prompt}`);
+    } catch(err) {
+        context.res = {
+            status: 500,
+            body: `Error getting prompt from text\n${JSON.stringify(err)}`
+        };
+        return;
+    }
 
-    // TODO: Add prompt beautification
-
-    // TODO: Send this off to Stable Diffusion
+    let image: string;
+    try {
+        context.log(`Got image from prompt: ${prompt}`);
+        image = await getImageFromPrompt(prompt, req.body.conversationId, req.body.timeStamp);
+        context.log(`Got image from prompt: ${prompt}`);
+    } catch(err) {
+        context.res = {
+            status: 500,
+            body: `Error getting image from prompt\n${JSON.stringify(err)}`
+        };
+        return;
+    }
 
     context.res = {
-        // status: 200, /* Defaults to 200 */
         body: {
-            prompt: prompt,
-            conversationId: req.query.conversationId,
-            timestamp: req.query.timestamp
+            text,
+            prompt,
+            conversationId: req.body.conversationId,
+            timeStamp: req.body.timeStamp,
+            image
         }
     };
 
