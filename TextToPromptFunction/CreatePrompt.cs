@@ -9,7 +9,7 @@ namespace TextToPromptFunction
 {
     public static class SubjectPrompt
     {
-        private static readonly AzureKeyCredential credentials = new AzureKeyCredential(""); //@@TODO. For now, Get Me: https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/asset/Microsoft_Azure_KeyVault/Secret/https://hackathon-sd-kv.vault.azure.net/secrets/functionapp-azure-key
+
         private static readonly Uri endpoint = new Uri("https://textanalyticssdhack.cognitiveservices.azure.com/");
 
         public class SentimentImporantSentanceEntityResult
@@ -30,11 +30,12 @@ namespace TextToPromptFunction
             public string Prompt { get => prompt; set => prompt = value; }
         }
 
-        public static async Task<SentimentImporantSentanceEntityResult> Parse(string text)
+        public static async Task<SentimentImporantSentanceEntityResult> Parse(string azureKey, string text, double MinConfidenceScore)
         {
+            var credentials = new AzureKeyCredential(azureKey); //@@TODO https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/asset/Microsoft_Azure_KeyVault/Secret/https://hackathon-sd-kv.vault.azure.net/secrets/functionapp-azure-key
             var client = new TextAnalyticsClient(endpoint, credentials);
 
-            var sentimentAndImporantSentanceResults = await SentimentAndImportantSentance(client, text);
+            var sentimentAndImporantSentanceResults = await SentimentAndImportantSentance(client, text, MinConfidenceScore);
             var entities = await ExtractEntities(client, sentimentAndImporantSentanceResults.Text);
             if (entities != null)
             {
@@ -44,7 +45,7 @@ namespace TextToPromptFunction
             return sentimentAndImporantSentanceResults;
         }
 
-        static async Task<SentimentImporantSentanceEntityResult> SentimentAndImportantSentance(TextAnalyticsClient client, string document)
+        static async Task<SentimentImporantSentanceEntityResult> SentimentAndImportantSentance(TextAnalyticsClient client, string document, double MinConfidenceScore)
         {
             var sentimentAndImporantSentanceResult = new SentimentImporantSentanceEntityResult();
 
@@ -82,8 +83,8 @@ namespace TextToPromptFunction
                             HandleAnalyzeError(documentResults.Error);
                             continue;
                         }
-
-                        sentimentAndImporantSentanceResult.Text = documentResults.Sentences.First(s => s.RankScore == 1).Text;
+                        
+                        sentimentAndImporantSentanceResult.Text = string.Join(". ", documentResults.Sentences.Where(s => s.RankScore >= MinConfidenceScore).Select(s => s.Text));
                         Console.WriteLine($"{sentimentAndImporantSentanceResult.Text}");
                     }
                 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -21,6 +22,13 @@ namespace TextToPromptFunction
             ILogger log)
         {
             log.LogInformation("TextToPrompt running");
+            var config = new ConfigurationBuilder()
+                        .SetBasePath(Environment.CurrentDirectory)
+                        .AddJsonFile("appsettings.json", false)
+                        .AddEnvironmentVariables()
+                        .Build();
+
+            var azureKey = config.GetValue<string>("AzureKeyCredential");
 
             // 
             // Used to temporarily allow GET and POST params @@TODO Only POST is working right now
@@ -30,7 +38,7 @@ namespace TextToPromptFunction
             //
             // Get Important Sentence, Enties, and Sentiment 
             // 
-            var textAnalyticsResult = await SubjectPrompt.Parse(parms.Text);
+            var textAnalyticsResult = await SubjectPrompt.Parse(azureKey, parms.Text, parms.MinConfidenceScore);
 
             var inputForPrompt = parms.PromptContentType == PromptContentTypes.rawText ? new List<string> { textAnalyticsResult.Text } : textAnalyticsResult.Entities;
 
