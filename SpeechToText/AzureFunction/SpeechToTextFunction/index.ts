@@ -9,6 +9,11 @@ type Request = HttpRequest & {
         conversationId: string;
         timeStamp: string;
         speech: string
+    } | {
+        SPEECH_KEY: string;
+        conversationId: string;
+        timeStamp: string;
+        text: string
     }
 }
 
@@ -35,29 +40,32 @@ const httpTrigger: AzureFunction = async function (context: ContextResponse, req
 
     context.log('HTTP trigger function processed a request.');
 
-    let buffer: Buffer;
-    try {
-        buffer = Buffer.from(req.body.speech, 'binary');
-        context.log('Converted speech WAV to buffer, successfully');
-    } catch(err) {
-        context.res = {
-            status: 500,
-            body: `Error converting speech WAV into buffer\n${JSON.stringify(err)}`
+    let text = req.body.text;
+    if (!text) {
+        let buffer: Buffer;
+        try {
+            buffer = Buffer.from(req.body.speech, 'binary');
+            context.log('Converted speech WAV to buffer, successfully');
+        } catch(err) {
+            context.res = {
+                status: 500,
+                body: `Error converting speech WAV into buffer\n${JSON.stringify(err)}`
+            }
+            return;
         }
-        return;
-    }
 
-    let text: string;
-    try {
-        text = await getTextFromSpeech(buffer);
-        context.log(`Got text from speech: ${text}`);
-    } catch(err) {
-        context.res = {
-            status: 500,
-            body: `Error converting Speech to Text\n${JSON.stringify(err)}`
-        };
-        return;
+        try {
+            text = await getTextFromSpeech(buffer);
+            context.log(`Got text from speech: ${text}`);
+        } catch(err) {
+            context.res = {
+                status: 500,
+                body: `Error converting Speech to Text\n${JSON.stringify(err)}`
+            };
+            return;
+        }
     }
+    
     
     let prompt: string;
     try {

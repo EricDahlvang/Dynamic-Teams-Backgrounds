@@ -19,7 +19,7 @@ export const getPromptFromText = async (text: string): Promise<string> => {
     const body: PromptRequestBody = {
         Text: text,
         MinConfidenceScore: 0.1,
-        PromptContentType: 'Entities'
+        PromptContentType: 'RawText'
     };
 
     const response = await fetch(process.env.PROMPT_URL, {
