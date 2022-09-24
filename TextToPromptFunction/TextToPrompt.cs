@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -24,12 +25,12 @@ namespace TextToPromptFunction
             log.LogInformation("TextToPrompt running");
             var config = new ConfigurationBuilder()
                         .SetBasePath(Environment.CurrentDirectory)
-                        .AddJsonFile("appsettings.json", false)
+                        .AddJsonFile("local.settings.json", true)
                         .AddEnvironmentVariables()
                         .Build();
 
-            var azureKey = config.GetValue<string>("AzureKeyCredential");
-
+            string azureKey = config.GetValue<string>("AzureKeyCredential");
+            
             // 
             // Used to temporarily allow GET and POST params @@TODO Only POST is working right now
             //
@@ -38,20 +39,23 @@ namespace TextToPromptFunction
             //
             // Get Important Sentence, Enties, and Sentiment 
             // 
-            var textAnalyticsResult = await SubjectPrompt.Parse(azureKey, parms.Text, parms.MinConfidenceScore);
+            var textAnalyticsResult  = await SubjectPrompt.Parse(azureKey, parms.Text, parms.MinConfidenceScore);
+            
 
-            var inputForPrompt = parms.PromptContentType == PromptContentTypes.rawText ? new List<string> { textAnalyticsResult.Text } : textAnalyticsResult.Entities;
-
-            if (textAnalyticsResult.Neutral > textAnalyticsResult.Positive) //@@TODO Little hack for tonight. Need to figure this out.. 
-                textAnalyticsResult.Positive = textAnalyticsResult.Neutral;
+            var inputForPrompt = parms.PromptContentType == PromptContentTypes.rawText ? textAnalyticsResult.Text  : 
+                   textAnalyticsResult.Entities.Count != 0 ? textAnalyticsResult.Entities : textAnalyticsResult.Text ;
 
             //
             // Just do a pos/neg range (I may not be groking postive/negative fields usage here...)
             //
-            var decorations = StableDiffusionDecoration.CreateRandomDecoratorsBasedOnSentiment(textAnalyticsResult.Positive > textAnalyticsResult.Negative ? textAnalyticsResult.Positive : textAnalyticsResult.Negative * -1);
+            var decorations = StableDiffusionDecoration.CreateRandomDecoratorsBasedOnSentiment(textAnalyticsResult.Positive, textAnalyticsResult.Negative,  textAnalyticsResult.Neutral);
 
             var deocrationsList = string.Join(", ", decorations);
-            var subjectList = string.Join(", ", inputForPrompt);
+
+
+            var emphasis = inputForPrompt.Select(s => $"(({s}))"); // Force emphasis 
+
+            var subjectList = string.Join(" and ", emphasis);
 
             var finalPrompt = $"{subjectList}, {deocrationsList}";
 

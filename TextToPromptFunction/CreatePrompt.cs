@@ -14,14 +14,14 @@ namespace TextToPromptFunction
 
         public class SentimentImporantSentanceEntityResult
         {
-            private string text = "";
+            private List<string> text;
             private double positive;
             private double neutral;
             private double negative;
             private List<string> entities = new List<string>();
             private string prompt = "";
 
-            public string Text { get => text; set => text = value; }
+            public List<string> Text { get => text; set => text = value; }
             public double Positive { get => positive; set => positive = value; }
             public double Neutral { get => neutral; set => neutral = value; }
             public double Negative { get => negative; set => negative = value; }
@@ -36,12 +36,16 @@ namespace TextToPromptFunction
             var client = new TextAnalyticsClient(endpoint, credentials);
 
             var sentimentAndImporantSentanceResults = await SentimentAndImportantSentance(client, text, MinConfidenceScore);
+
+            if (sentimentAndImporantSentanceResults.Text.Count == 0)
+                sentimentAndImporantSentanceResults.Text = new List<string>() { text };
+
             var entities = await ExtractEntities(client, sentimentAndImporantSentanceResults.Text);
-            if (entities != null)
+            if ( entities.Count() != 0)
             {
                 sentimentAndImporantSentanceResults.Entities = entities.Select(item => item.Text).ToList();
             }
-
+          
             return sentimentAndImporantSentanceResults;
         }
 
@@ -83,8 +87,8 @@ namespace TextToPromptFunction
                             HandleAnalyzeError(documentResults.Error);
                             continue;
                         }
-                        
-                        sentimentAndImporantSentanceResult.Text = string.Join(". ", documentResults.Sentences.Where(s => s.RankScore >= MinConfidenceScore).Select(s => s.Text));
+                                                
+                        sentimentAndImporantSentanceResult.Text = documentResults.Sentences.Where(s => s.RankScore >= MinConfidenceScore).Select(s =>  s.Text).ToList(); 
                         Console.WriteLine($"{sentimentAndImporantSentanceResult.Text}");
                     }
                 }
@@ -108,11 +112,12 @@ namespace TextToPromptFunction
             return (sentimentAndImporantSentanceResult);
         }
 
-        static async Task<IEnumerable<CategorizedEntity>> ExtractEntities(TextAnalyticsClient client, string document)
+        static async Task<IEnumerable<CategorizedEntity>> ExtractEntities(TextAnalyticsClient client, List<string> documents)
         {
             try
             {
                 var minConfidenceScore = .10;
+                var document = string.Join("", documents);
                 var response = await client.RecognizeEntitiesAsync(document);
                 CategorizedEntityCollection entitiesInDocument = response.Value;
 
@@ -121,17 +126,15 @@ namespace TextToPromptFunction
                     EntityCategory.Organization,
                     EntityCategory.Person,
                     EntityCategory.PersonType,
+                    EntityCategory.Event,
                     EntityCategory.Product,
                     EntityCategory.Skill
                 };
-
+            
                 var result = entitiesInDocument
                     .Where(t => interestingNER.Contains(t.Category))
-                    .Where(t => t.ConfidenceScore > minConfidenceScore)
-                    .GroupBy(t => t.Category)
-                    .Select(group => group.First())
-                    .ToList()
-                    .DefaultIfEmpty();
+                    .Where(t => t.ConfidenceScore > minConfidenceScore)                    
+                    .ToList();
 
                 return result;
             }
