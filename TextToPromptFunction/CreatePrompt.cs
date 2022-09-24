@@ -133,7 +133,8 @@ namespace TextToPromptFunction
             
                 var result = entitiesInDocument
                     .Where(t => interestingNER.Contains(t.Category))
-                    .Where(t => t.ConfidenceScore > minConfidenceScore)                    
+                    .Where(t => t.ConfidenceScore > minConfidenceScore)     
+                    .DistinctBy(t => t.Text)
                     .ToList();
 
                 return result;
