@@ -30,6 +30,10 @@ export const getPromptFromText = async (text: string): Promise<string> => {
         }
     });
 
+    if (response.status >= 300) {
+        throw `${response.status}: ${response.statusText}. ${await response.text()}`
+    }
+
     const json: PromptResponse = await response.json();
     
     return json.Prompt;
