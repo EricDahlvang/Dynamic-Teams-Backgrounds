@@ -32,7 +32,7 @@ namespace TextToPromptFunction
             //var resolutions = TakeRandom(rnd, resolutionBySentiment);
             //var emotions = TakeRandom(rnd, emotionBySentiment);
 
-            var artistBySentimentBy = new List<string>() { "by " + string.Join(" and ", artistBySentiment) };
+            var artistBySentimentBy = new List<string>() { "in the syle of " + string.Join(" and ", artistBySentiment) };
             var decorations = emotionBySentiment
                                     .Concat(artistBySentimentBy)
                                     .Concat(cameraSentiment)
@@ -106,7 +106,7 @@ namespace TextToPromptFunction
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Oil Paint" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Puppet" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Done in LEGO" ),
-                new KeyValuePair<Sentiment,string>(Sentiment.Postive, "german romanticism" ),
+                new KeyValuePair<Sentiment,string>(Sentiment.Postive, "German romanticism" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Puppet" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "impressionism" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "the matrix" ),
@@ -131,7 +131,7 @@ namespace TextToPromptFunction
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Chillwave" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Dark Academia" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Crosshatch" ),
-                new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Penci Art" ),
+                new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Pencil Art" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Etching" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Carving" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Spray Paint" ),
@@ -145,13 +145,11 @@ namespace TextToPromptFunction
         {
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Andy Warhol"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Charlie Bowater" ),
-                new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Claud Monet"),
-                new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Lemma Guya" ),
+                new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Claude Monet"),                
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "WLOP" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Leonardo da Vinci" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Rembrandt" ),
-                new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Sandro Botticelli" ),
-                new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Frida Haho" ),
+                new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Sandro Botticelli" ),               
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "David Hockney" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Bob Byerley" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Kim Tschang Yeul" ),
@@ -179,8 +177,7 @@ namespace TextToPromptFunction
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "John Kenn Mortensen" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Edvard Munch" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Hieronymus Bosch" ),
-                new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Pieter Bruegel The Elder" ),
-                new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Kiki Smith" ),
+                new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Pieter Bruegel The Elder" ),                
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "H.R. Giger" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Edward Hopper" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Assassin's Creed" )
@@ -190,7 +187,7 @@ namespace TextToPromptFunction
         {
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Photography"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Photoshoot"),
-                new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Portait"),
+                new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Portrait"),
 
                 new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Long Exposure"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "F/22"),
@@ -213,14 +210,13 @@ namespace TextToPromptFunction
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Provia"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Shot on 70mm"),
 
-                new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Portait"),
+                new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Portrait"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Instax" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Vintage" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Kodak Portra" ),
-                new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Schlieren" ),
-                new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Schlieren" ),
+                new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Schlieren" ),                
 
-                new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Daguerrotype" ),
+                new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Daguerreotype" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Caoltype" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Tintype" ),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Tri-X 400 TX" ),
@@ -269,7 +265,7 @@ namespace TextToPromptFunction
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Smiling"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Grinning"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Love"),
-                new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Insipration"),
+                new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Inspiration"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Fun"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Pleasure"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Postive, "Joy"),
@@ -285,7 +281,7 @@ namespace TextToPromptFunction
                 new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Surprise"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Distracted"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Realization"),
-                new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Confusiuon"),
+                new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Confusion"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Content"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Calm"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Neutral, "Trust"),
@@ -311,7 +307,7 @@ namespace TextToPromptFunction
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Gloomy"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Offended"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Alarmed"),
-                new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Afaid"),
+                new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Afraid"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Dislike"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Guilt"),
                 new KeyValuePair<Sentiment,string>(Sentiment.Negative, "Regret"),

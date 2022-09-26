@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
@@ -22,51 +23,62 @@ namespace TextToPromptFunction
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("TextToPrompt running");
-            var config = new ConfigurationBuilder()
-                        .SetBasePath(Environment.CurrentDirectory)
-                        .AddJsonFile("local.settings.json", true)
-                        .AddEnvironmentVariables()
-                        .Build();
-
-            string azureKey = config.GetValue<string>("AzureKeyCredential");
-            
-            // 
-            // Used to temporarily allow GET and POST params @@TODO Only POST is working right now
-            //
-            var parms = await ParseParams(req);
-
-            //
-            // Get Important Sentence, Enties, and Sentiment 
-            // 
-            var textAnalyticsResult  = await SubjectPrompt.Parse(azureKey, parms.Text, parms.MinConfidenceScore);
-            
-
-            var inputForPrompt = parms.PromptContentType == PromptContentTypes.rawText ? textAnalyticsResult.Text  : 
-                   textAnalyticsResult.Entities.Count != 0 ? textAnalyticsResult.Entities : textAnalyticsResult.Text ;
-
-            //
-            // Just do a pos/neg range (I may not be groking postive/negative fields usage here...)
-            //
-            var decorations = StableDiffusionDecoration.CreateRandomDecoratorsBasedOnSentiment(textAnalyticsResult.Positive, textAnalyticsResult.Negative,  textAnalyticsResult.Neutral);
-
-            var deocrationsList = string.Join(", ", decorations);
-
-
-            var emphasis = inputForPrompt.Select(s => $"(({s}))"); // Force emphasis 
-
-            var subjectList = string.Join(" and ", emphasis);
-
-            var finalPrompt = $"{subjectList}, {deocrationsList}";
-
-            textAnalyticsResult.Prompt = finalPrompt;
-
-            var result = JsonConvert.SerializeObject(textAnalyticsResult, Formatting.Indented);
-
-            return new HttpResponseMessage(HttpStatusCode.OK)
+            try
             {
-                Content = new StringContent(result, Encoding.UTF8, "application/json")
-            };
+                log.LogInformation("TextToPrompt running");
+                var config = new ConfigurationBuilder()
+                            .SetBasePath(Environment.CurrentDirectory)
+                            .AddJsonFile("local.settings.json", true)
+                            .AddEnvironmentVariables()
+                            .Build();
+
+                string azureKey = config.GetValue<string>("AzureKeyCredential");
+
+                // 
+                // Used to temporarily allow GET and POST params @@TODO Only POST is working right now
+                //
+                var parms = await ParseParams(req);
+
+                //
+                // Get Important Sentence, Entities, and Sentiment 
+                // 
+                var textAnalyticsResult = await SubjectPrompt.Parse(azureKey, parms.Text, parms.MinConfidenceScore);
+
+
+                var inputForPrompt = parms.PromptContentType == PromptContentTypes.rawText ? textAnalyticsResult.Text :
+                       textAnalyticsResult.Entities.Count != 0 ? textAnalyticsResult.Entities : textAnalyticsResult.Text;
+
+                //
+                // Just do a pos/neg range (I may not be grokking positive/negative fields usage here...)
+                //
+                var decorations = StableDiffusionDecoration.CreateRandomDecoratorsBasedOnSentiment(textAnalyticsResult.Positive, textAnalyticsResult.Negative, textAnalyticsResult.Neutral);
+
+                var deocrationsList = string.Join(", ", decorations);
+
+
+                var emphasis = inputForPrompt.Select(s => $"(({s}))"); // Force emphasis 
+
+                var subjectList = string.Join(" and ", emphasis);
+
+                var finalPrompt = $"{subjectList}, {deocrationsList}";
+
+                textAnalyticsResult.Prompt = finalPrompt;
+
+                var result = JsonConvert.SerializeObject(textAnalyticsResult, Formatting.Indented);
+
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(result, Encoding.UTF8, "application/json")
+                };
+            }
+            catch(Exception ex)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                {
+                    Content = new StringContent(ex.Message, Encoding.UTF8, "application/json")
+                };
+
+            }
         }
 
         private static async Task<TextToPromptInput> ParseParams(HttpRequest req)

@@ -25,7 +25,6 @@ namespace TextToPromptFunction
             public double Positive { get => positive; set => positive = value; }
             public double Neutral { get => neutral; set => neutral = value; }
             public double Negative { get => negative; set => negative = value; }
-
             public List<string> Entities { get => entities; set => entities = value; }
             public string Prompt { get => prompt; set => prompt = value; }
         }
