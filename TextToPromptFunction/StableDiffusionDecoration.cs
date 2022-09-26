@@ -32,7 +32,7 @@ namespace TextToPromptFunction
             //var resolutions = TakeRandom(rnd, resolutionBySentiment);
             //var emotions = TakeRandom(rnd, emotionBySentiment);
 
-            var artistBySentimentBy = new List<string>() { "in the syle of " + string.Join(" and ", artistBySentiment) };
+            var artistBySentimentBy = new List<string>() { "in the style of " + string.Join(" and ", artistBySentiment) };
             var decorations = emotionBySentiment
                                     .Concat(artistBySentimentBy)
                                     .Concat(cameraSentiment)
