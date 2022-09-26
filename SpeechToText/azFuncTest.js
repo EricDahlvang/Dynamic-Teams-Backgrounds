@@ -18,7 +18,7 @@ const body = JSON.stringify({
     SPEECH_KEY: process.env.SPEECH_KEY
 });
 
-fetch(remoteUrl, {
+fetch(localUrl, {
     method: 'POST',
     body,
     headers: {

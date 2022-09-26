@@ -40,12 +40,12 @@ const httpTrigger: AzureFunction = async function (context: ContextResponse, req
 
     context.log('HTTP trigger function processed a request.');
 
+    // TODO: Queue or cutoff limits
     let text = req.body.text;
     if (!text) {
         let buffer: Buffer;
         try {
             buffer = Buffer.from(req.body.speech, 'binary');
-            context.log('Converted speech WAV to buffer, successfully');
         } catch(err) {
             context.res = {
                 status: 500,
@@ -53,10 +53,10 @@ const httpTrigger: AzureFunction = async function (context: ContextResponse, req
             }
             return;
         }
+        context.log('Converted speech WAV to buffer, successfully');
 
         try {
             text = await getTextFromSpeech(buffer);
-            context.log(`Got text from speech: ${text}`);
         } catch(err) {
             context.res = {
                 status: 500,
@@ -65,12 +65,12 @@ const httpTrigger: AzureFunction = async function (context: ContextResponse, req
             return;
         }
     }
+    context.log(`Got text from speech: ${text}`);
     
     
     let prompt: string;
     try {
         prompt = await getPromptFromText(text);
-        context.log(`Got prompt from text: ${prompt}`);
     } catch(err) {
         context.res = {
             status: 500,
@@ -78,12 +78,12 @@ const httpTrigger: AzureFunction = async function (context: ContextResponse, req
         };
         return;
     }
+    context.log(`Got prompt from text: ${prompt}`);
 
     let image: string;
     try {
         context.log(`Got image from prompt: ${prompt}`);
         image = await getImageFromPrompt(prompt, req.body.conversationId, req.body.timeStamp);
-        context.log(`Got image from prompt: ${prompt}`);
     } catch(err) {
         context.res = {
             status: 500,
@@ -91,6 +91,7 @@ const httpTrigger: AzureFunction = async function (context: ContextResponse, req
         };
         return;
     }
+    context.log(`Got image from prompt: ${prompt}`);
 
     context.res = {
         body: {
